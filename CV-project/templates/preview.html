@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>ChromaKey — настройки и предпросмотр</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="container">
+  <h1>Настройки кеинга и предпросмотр</h1>
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="messages">
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <div class="settings">
+    <form method="post" action="{{ url_for('process') }}" enctype="multipart/form-data">
+      <input type="hidden" name="video_filename" value="{{ video_filename }}">
+      <input type="hidden" name="picked_hex" value="{{ picked_hex or '' }}">
+
+      <h3>1) Выбор фона</h3>
+      <label><input type="radio" name="bg_mode" value="color" checked> Цвет</label>
+      <input type="text" id="bg_color_input" name="bg_color" placeholder="#Введите цвет HEX" value="">
+
+      <label style="display:block;margin-top:8px"><input type="radio" name="bg_mode" value="image"> Изображение (фон)</label>
+      <input type="file" name="bg_image" accept="image/*">
+
+      <h3>2) Настройки кеинга</h3>
+      <label>Tolerance (0-255):
+        <input type="number" name="tolerance" min="0" max="255" value="{{ params_default.tolerance }}">
+      </label>
+      <label>Blur (нечётное):
+        <input type="number" name="blur" min="1" max="51" step="2" value="{{ params_default.blur }}">
+      </label>
+      <label>Edge Thin/Choke (-20..20):
+        <input type="number" name="edge_thin" min="-20" max="20" value="{{ params_default.edge_thin }}">
+      </label>
+      <label>Despill Strength (0-1):
+        <input type="number" step="0.05" name="despill_strength" min="0" max="1" value="{{ params_default.despill_strength }}">
+      </label>
+      <label>Alpha (0-1):
+        <input type="number" step="0.05" name="alpha" min="0" max="1" value="{{ params_default.alpha }}">
+      </label>
+
+      <div class="row">
+        <button type="submit" class="btn">Запустить обработку и создать видео</button>
+      </div>
+    </form>
+  </div>
+
+  {% if processed_video %}
+    <hr>
+    <h2>Предпросмотр результата</h2>
+    <video width="720" controls>
+      <source src="{{ url_for('outputs', filename=processed_video) }}" type="video/webm">
+      Ваш браузер не поддерживает тег video.
+    </video>
+    <p>
+      <a href="{{ url_for('downloads', filename=processed_video) }}" class="btn">Скачать результат</a>
+    </p>
+  {% endif %}
+
+  <div class="back">
+    <a href="{{ url_for('index') }}">← начать заново</a>
+  </div>
+</div>
+</body>
+</html>
